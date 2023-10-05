@@ -14,7 +14,14 @@ def get_br(sinba, m12, tanb, thdm, decay='H  -> h  h', m_A=500):
         return float(out.split()[-2]), float(out.split()[-1])
     except IndexError: # output doesn't contain H->hh line if B is zero
         return 0.000000001, 0.0000000001
-    
+
+boson_to_label = { # B2G-23-002 convention
+    'A': 'A',
+    'H': 'X',
+    'h': 'H',
+}
+
+
 m_A = 500.
 tanb = 5
 beta = math.atan(tanb)
@@ -66,8 +73,9 @@ def make_hist(thdm, cosba, decay='H  -> h  h', decay_tag='Htohh'):
     style.cd()
     cv = ROOT.TCanvas()
     boson = decay[0]
-    h2.GetXaxis().SetTitle('m_{' + f'{boson}' + ' [GeV]')
+    h2.GetXaxis().SetTitle('m_{' + f'{boson_to_label[boson]}' + '} [GeV]')
     h2.GetYaxis().SetTitle('tan #beta')
+    h2.GetZaxis().SetTitle('#bf{#it{#Beta}}(X #rightarrow HH)' if decay == 'H  -> h  h' else '#bf{#it{#Beta}}(A #rightarrow ZH)')
     h2.SetContour(40)
     h2.Draw('COLZ')
 
@@ -78,7 +86,7 @@ def make_hist(thdm, cosba, decay='H  -> h  h', decay_tag='Htohh'):
 
     l = cv.GetLeftMargin()
     t = cv.GetTopMargin()
-    latex.DrawLatex(l + 0.02, 1-t + 0.02, f'2HDM type {thdm} cos(#beta - #alpha) = {cosba}')
+    latex.DrawLatex(l + 0.02, 1-t + 0.02, f'2HDM type {thdm}  cos(#beta - #alpha) = {cosba}')
 
     cv.SaveAs(f'B_{decay_tag}_type{thdm}_cosba{cosba}.pdf')
     cv.SaveAs(f'B_{decay_tag}_type{thdm}_cosba{cosba}.root')
@@ -112,6 +120,7 @@ def make_hist_fixedm(thdm, mass, decay='H  -> h  h', decay_tag='Htohh'):
     h2.GetXaxis().SetTitle('cos(#beta - #alpha)')
     h2.GetXaxis().SetNdivisions(505)
     h2.GetYaxis().SetTitle('tan #beta')
+    h2.GetZaxis().SetTitle('#bf{#it{#Beta}}(X #rightarrow HH)' if decay == 'H  -> h  h' else '#bf{#it{#Beta}}(A #rightarrow ZH)')
     h2.SetContour(40)
     h2.Draw('COLZ')
 
@@ -124,7 +133,7 @@ def make_hist_fixedm(thdm, mass, decay='H  -> h  h', decay_tag='Htohh'):
     t = cv.GetTopMargin()
 
     boson = decay[0]
-    latex.DrawLatex(l + 0.02, 1-t + 0.02, f'2HDM type {thdm}' + m_{' + boson + '} = {mass} GeV')
+    latex.DrawLatex(l + 0.02, 1-t + 0.03, f'2HDM type {thdm} m_{{{boson_to_label[boson]}}} = {mass} GeV')
 
     cv.SaveAs(f'B_{decay_tag}_type{thdm}_mH{mass}.pdf')
     cv.SaveAs(f'B_{decay_tag}_type{thdm}_mH{mass}.root')
@@ -134,7 +143,7 @@ def make_hist_fixedm(thdm, mass, decay='H  -> h  h', decay_tag='Htohh'):
 for decay, decay_tag in [('A  -> Z  h', 'AtoZh'), ('H  -> h  h', 'Htohh')]:
     
     for thdm in [1, 2, 3, 4]:
-        for mass in [300, 500, 700]:
+        for mass in [300, 500]: #, 700]:
             make_hist_fixedm(thdm, mass, decay, decay_tag)
-        for cosba in [0.05, 0.001, 0.01, 0.02]:
+        for cosba in [0.02]: #[0.05, 0.001, 0.01, 0.02]:
             make_hist(thdm, cosba, decay, decay_tag)
